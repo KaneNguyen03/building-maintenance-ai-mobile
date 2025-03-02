@@ -11,6 +11,7 @@ import {
   Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
@@ -51,12 +52,19 @@ const OTPScreen = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const enteredOtp = otp.join('');
     
     if (params.userType === 'resident') {
       const resident = mockData.residents.find(r => r.phone === params.identifier);
       if (resident && resident.otp === enteredOtp) {
+        // Lưu thông tin người dùng
+        await AsyncStorage.setItem('userData', JSON.stringify({
+          name: resident.name,
+          phone: resident.phone,
+          userType: 'resident'
+        }));
+        
         Alert.alert("Success", `Welcome ${resident.name}`, [
           { text: "OK", onPress: () => navigation.navigate('MainApp') }
         ]);
@@ -66,6 +74,13 @@ const OTPScreen = () => {
     } else {
       const staff = mockData.staff.find(s => s.email === params.identifier);
       if (staff && staff.otp === enteredOtp) {
+        // Lưu thông tin người dùng
+        await AsyncStorage.setItem('userData', JSON.stringify({
+          name: staff.name,
+          email: staff.email,
+          userType: 'staff'
+        }));
+        
         Alert.alert("Success", `Welcome ${staff.name}`, [
           { text: "OK", onPress: () => navigation.navigate('MainApp') }
         ]);

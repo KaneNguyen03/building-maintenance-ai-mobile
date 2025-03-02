@@ -1,12 +1,12 @@
+// App.tsx
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabNavigator from './src/components/Navigation/BottomTabNavigator';
 import SignInScreen from './src/screen/SignInScreen';
 import OTPScreen from './src/screen/OTPScreen';
+import MoreScreen from './src/screen/More';
 import { RootStackParamList } from './src/types';
-
-
 
 const Stack = createStackNavigator<RootStackParamList>();
 const App = () => {
@@ -16,6 +16,7 @@ const App = () => {
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
         <Stack.Screen name="OTPScreen" component={OTPScreen} />
         <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="More" component={MoreScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );

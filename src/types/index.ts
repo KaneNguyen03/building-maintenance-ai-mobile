@@ -1,5 +1,3 @@
-// src/types/index.ts
-
 export type BottomTabParamList = {
   Home: undefined;
   Property: undefined;
@@ -13,5 +11,6 @@ export type RootStackParamList = {
     userType: "resident" | "staff";
     identifier: string;
   };
+  More: undefined;
 };
 

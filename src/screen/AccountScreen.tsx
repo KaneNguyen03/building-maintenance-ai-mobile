@@ -1,89 +1,209 @@
-// src/components/screen/AccountScreen.tsx
-
-import React from 'react';
+// src/screen/AccountScreen.tsx
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AccountScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MainApp'>;
+
 const AccountScreen = () => {
- const navigation = useNavigation<AccountScreenNavigationProp>();
-  
+  const navigation = useNavigation<AccountScreenNavigationProp>();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const userDataString = await AsyncStorage.getItem('userData');
+      if (userDataString) {
+        const userData = JSON.parse(userDataString);
+        setUserData(userData);
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+        setUserData(null);
+      }
+    } catch (error) {
+      console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error);
+    }
+  };
+
   const handleSignIn = () => {
     navigation.navigate('SignIn');
   };
-  return (
-    <View style={styles.container}>
-      <Text style={styles.headerTitle}>ACCOUNT</Text>
-      
-      {/* Guest profile section */}
-      <TouchableOpacity style={styles.profileCard} onPress={handleSignIn}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>G</Text>
+
+  const navigateToMore = () => {
+    navigation.navigate('More');
+  };
+
+  const handleChangePassword = () => {
+    // Xử lý đổi mật khẩu
+    Alert.alert('Thông báo', 'Chức năng đổi mật khẩu sẽ được phát triển sau');
+  };
+
+  // UI cho người dùng chưa đăng nhập
+  const renderGuestUI = () => {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Account</Text>
         </View>
-        <Text style={styles.guestText}>Guest</Text>
-        <Text style={styles.signInText}>Sign In</Text>
-      </TouchableOpacity>
-
-      {/* Menu items */}
-      <View style={styles.menuContainer}>
-        {/* User guide */}
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={[styles.iconContainer, { backgroundColor: '#FAE8D2' }]}>
-            <Icon name="menu-book" size={24} color="#B77F2E" />
-          </View>
-          <Text style={styles.menuText}>User guide</Text>
-          <Icon name="chevron-right" size={24} color="#CCCCCC" />
+        
+        <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+          <Text style={styles.signInText}>Sign Up</Text>
         </TouchableOpacity>
+        
+        <View style={styles.optionsList}>
+          <TouchableOpacity style={styles.optionItem}>
+            <Icon name="language" size={24} color="#666" />
+            <Text style={styles.optionText}>Language</Text>
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+          </TouchableOpacity>
+          
+          
+          <TouchableOpacity style={styles.optionItem}>
+            <Icon name="info" size={24} color="#666" />
+            <Text style={styles.optionText}>About Us</Text>
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
 
-        {/* About us */}
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={[styles.iconContainer, { backgroundColor: '#F2E8D9' }]}>
-            <Icon name="business" size={24} color="#B77F2E" />
+  // UI cho người dùng đã đăng nhập
+  const renderUserUI = () => {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Account</Text>
+          <TouchableOpacity onPress={navigateToMore} style={styles.menuButton}>
+            <Icon name="menu" size={28} color="#000" />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.userInfoContainer}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {userData?.name ? userData.name.charAt(0).toUpperCase() : 'U'}
+            </Text>
           </View>
-          <Text style={styles.menuText}>About us</Text>
-          <Icon name="chevron-right" size={24} color="#CCCCCC" />
-        </TouchableOpacity>
+          <View style={styles.userDetails}>
+            <Text style={styles.userName}>{userData?.name || 'Resident'}</Text>
+            <Text style={styles.userContact}>
+              {userData?.phone || userData?.email || ''}
+            </Text>
+          </View>
+        </View>
+        
+        <View style={styles.cardsContainer}>
+          <TouchableOpacity style={styles.card}>
+            <Icon name="description" size={24} color="#000" />
+            <Text style={styles.cardText}>MyReport</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.card}>
+            <Icon name="bookmarks" size={24} color="#000" />
+            <Text style={styles.cardText}>My review</Text>
+          </TouchableOpacity>
+          
+        </View>
+        
+        <View style={styles.optionsList}>
+          <TouchableOpacity style={styles.optionItem}>
+            <Icon name="location-on" size={24} color="#666" />
+            <Text style={styles.optionText}>Address</Text>
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.optionItem} onPress={handleChangePassword}>
+            <Icon name="lock" size={24} color="#666" />
+            <Text style={styles.optionText}>ChangePassword</Text>
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+          </TouchableOpacity>
+        </View>
       </View>
+    );
+  };
 
-      {/* App version and copyright info */}
-      <View style={styles.footerContainer}>
-        <Text style={styles.copyrightText}>Copyright©2025</Text>
-        <Text style={styles.copyrightText}>Allright reserved by BMCMS</Text>
-      </View>
-    </View>
-  );
+  return isLoggedIn ? renderUserUI() : renderGuestUI();
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    padding: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 36,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 24,
   },
-  profileCard: {
+  menuButton: {
+    padding: 8,
+  },
+  signInButton: {
+    backgroundColor: '#B77F2E',
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  signInText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  optionsList: {
+    marginTop: 16,
+  },
+  optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAF7F2',
-    borderRadius: 12,
     padding: 16,
-    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  avatarContainer: {
+  optionText: {
+    flex: 1,
+    marginLeft: 16,
+    fontSize: 16,
+  },
+  chevron: {
+    marginLeft: 'auto',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    margin: 16,
+  },
+  avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#5B9BD5',
+    backgroundColor: '#B77F2E',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -92,52 +212,40 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  guestText: {
-    fontSize: 24,
-    fontWeight: '500',
-    marginLeft: 16,
+  userDetails: {
     flex: 1,
+    marginLeft: 16,
   },
-  signInText: {
-    color: '#B77F2E',
-    fontSize: 16,
-    fontWeight: '500',
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  menuContainer: {
-    marginTop: 10,
+  userContact: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
   },
-  menuItem: {
+  qrContainer: {
+    padding: 8,
+  },
+  cardsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'space-around',
+    padding: 16,
   },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  card: {
+    width: '22%',
+    aspectRatio: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    padding: 8,
   },
-  menuText: {
-    fontSize: 18,
-    fontWeight: '500',
-    flex: 1,
-  },
-  footerContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 70, // Để không bị che bởi bottom tab navigator
-  },
-  versionText: {
-    color: '#AAAAAA',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  copyrightText: {
-    color: '#AAAAAA',
-    fontSize: 14,
+  cardText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
 
