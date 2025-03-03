@@ -12,5 +12,6 @@ export type RootStackParamList = {
     identifier: string;
   };
   More: undefined;
+  PropertyDetail:undefined;
 };
 
