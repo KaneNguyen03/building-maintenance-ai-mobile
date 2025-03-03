@@ -13,5 +13,6 @@ export type RootStackParamList = {
   };
   More: undefined;
   PropertyDetail:undefined;
+  RepairInside: undefined; 
 };
 

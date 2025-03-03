@@ -7,6 +7,7 @@ import OTPScreen from './src/screen/OTPScreen';
 import MoreScreen from './src/screen/More';
 import PropertyDetailScreen from './src/Resident/ui/PropertyDetailModal';
 import { RootStackParamList } from './src/types';
+import RepairInsideScreen from './src/Resident/ui/RepairInsideScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -19,6 +20,7 @@ const App = () => {
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="More" component={MoreScreen} />
         <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
+        <Stack.Screen name='RepairInside' component={RepairInsideScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
