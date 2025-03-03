@@ -1,9 +1,16 @@
-// src/types/index.ts
-
+export type BottomTabParamList = {
+  Home: undefined;
+  Property: undefined;
+  Notification: undefined;
+  Account: undefined;
+};
 export type RootStackParamList = {
-    Home: undefined;
-    Property: undefined;
-    Services: undefined;
-    Notification: undefined;
-    Account: undefined;
+  MainApp: undefined;
+  SignIn: undefined;
+  OTPScreen: {
+    userType: "resident" | "staff";
+    identifier: string;
   };
+  More: undefined;
+};
+
