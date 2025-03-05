@@ -1,31 +1,43 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Property } from '../types';
+import { PropertyService } from '../service/propertyservice';
 
 // Mock data (giả sử đã được import từ file khác)
-import { mockData } from '../mock/mockData';
+// import { mockData } from '../mock/mockData';
 import { useNavigation } from '@react-navigation/native';
 
 const ResidentPropertyScreen = () => {
   const navigation = useNavigation();
-  // Giả sử người dùng hiện tại là Nguyễn Văn A (có thể thay đổi logic này để lấy người dùng hiện tại)
-  const currentUser = mockData.residents[0]; // Lấy người dùng đầu tiên từ mockData
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Kiểm tra xem người dùng có thuộc tính hay không
-  const hasProperties = currentUser.property && currentUser.property.length > 0;
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
-  // @ts-ignore
-  const handleCardPress = (property) => {
-    // @ts-ignore
-    navigation.navigate('PropertyDetail', { property });
+  const fetchProperties = async () => {
+    try {
+      const userProperties = await PropertyService.getCurrentUserProperties();
+      setProperties(userProperties);
+    } catch (error) {
+      console.error('Lỗi tải thuộc tính:', error);
+    } finally {
+      setLoading(false);
+    }
   };
-// @ts-ignore
-  const renderPropertyItem = ({ item }) => {
+
+  // const handleCardPress = (property: Property) => {
+  //   navigation.navigate('PropertyDetail', { property });
+  // };
+
+  const renderPropertyItem = ({ item }: { item: Property }) => {
     return (
       <TouchableOpacity 
         style={styles.propertyCard} 
-        onPress={() => handleCardPress(item)}
+        // onPress={() => handleCardPress(item)}
         activeOpacity={0.8}
       >
         <View style={styles.propertyHeader}>
@@ -38,7 +50,7 @@ const ResidentPropertyScreen = () => {
         </Text>
         
         <Text style={styles.buildingInfo}>
-          Tòa {item.building} ({item.building}) | Căn hộ
+          Tòa {item.building} | Căn hộ
         </Text>
         
         <View style={styles.statusButton}>
@@ -48,18 +60,24 @@ const ResidentPropertyScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#B77F2E" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {hasProperties ? (
-        // Hiển thị danh sách các căn hộ dưới dạng card nếu người dùng có thuộc tính
+      {properties.length > 0 ? (
         <FlatList
-          data={currentUser.property}
+          data={properties}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderPropertyItem}
           contentContainerStyle={styles.listContainer}
         />
       ) : (
-        // Hiển thị UI ban đầu nếu người dùng không có thuộc tính
         <>
           <Image 
             source={require('../../assets/tower.jpg')} 
@@ -69,20 +87,8 @@ const ResidentPropertyScreen = () => {
 
           <Text style={styles.title}>Are you the owner or getting invitation by owner?</Text>
           <Text style={styles.description}>
-            Track your home's payment, follow up the construction progress or simply manage your homes with our services
+          Track your home's payment, follow up the construction progress or simply manage your homes with our services
           </Text>
-
-          <TouchableOpacity style={styles.button}>
-            <Icon2 name="crown" size={24} color="#B77F2E" />
-            <Text style={styles.buttonText}>Owner</Text>
-            <Icon name="chevron-right" size={24} color="#B77F2E" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button}>
-            <Icon name="group" size={24} color="#B77F2E" />
-            <Text style={styles.buttonText}>Invited by Owner</Text>
-            <Icon name="chevron-right" size={24} color="#B77F2E" />
-          </TouchableOpacity>
         </>
       )}
     </View>
@@ -148,12 +154,17 @@ const styles = StyleSheet.create({
     color: '#B77F2E',
     fontWeight: 'bold',
   },
-  // Các style hiện tại cho phần không có property
+  //property
   image: { width: 300, height: 300, marginVertical: 20 },
   title: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
   description: { fontSize: 14, textAlign: 'center', color: '#666', paddingHorizontal: 20, marginBottom: 20 },
   button: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F2E8D9', padding: 16, borderRadius: 12, width: '90%', justifyContent: 'space-between', marginVertical: 8 },
-  buttonText: { flex: 1, fontSize: 16, fontWeight: 'bold', color: '#B77F2E', textAlign: 'center' }
+  buttonText: { flex: 1, fontSize: 16, fontWeight: 'bold', color: '#B77F2E', textAlign: 'center' },
+  loadingContainer:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
+  }
 });
 
 export default ResidentPropertyScreen;

@@ -20,12 +20,7 @@ export interface Resident {
   id?: string;
   phone: number;
   name: string;
-  property: {
-    building: string;
-    floor: number;
-    unit: string;
-    status: string;
-  }[];
+  property: Property[];
   otp: string;
 }
 export interface Staff {
@@ -33,5 +28,11 @@ export interface Staff {
   email: string;
   name: string;
   otp: string;
+}
+export interface Property {
+  building: string;
+  floor: number;
+  unit: string;
+  status: string;
 }
 
