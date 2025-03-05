@@ -16,3 +16,22 @@ export type RootStackParamList = {
   RepairInside: undefined; 
 };
 
+export interface Resident {
+  id?: string;
+  phone: number;
+  name: string;
+  property: {
+    building: string;
+    floor: number;
+    unit: string;
+    status: string;
+  }[];
+  otp: string;
+}
+export interface Staff {
+  id?: string;
+  email: string;
+  name: string;
+  otp: string;
+}
+
