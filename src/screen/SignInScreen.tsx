@@ -8,7 +8,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { mockData } from '../mock/mockData';
+// import { mockData } from '../mock/mockData';
+import { AuthService } from '../service/api';
 
 type SignInScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SignIn'>;
 
@@ -22,27 +23,33 @@ const SignInScreen = () => {
     navigation.goBack();
   };
 
-  const handleNext = () => {
-    if (activeTab === 'resident') {
-      const resident = mockData.residents.find(r => r.phone === phone);
-      if (resident) {
-        navigation.navigate('OTPScreen', { 
-          userType: 'resident', 
-          identifier: phone 
-        });
+  const handleNext = async () => {
+    try {
+      if (activeTab === 'resident') {
+        const resident = await AuthService.findResidentByPhone(Number(phone));
+        
+        if (resident) {
+          navigation.navigate('OTPScreen', { 
+            userType: 'resident', 
+            identifier: phone 
+          });
+        } else {
+          Alert.alert("Lỗi", "Số điện thoại không tồn tại");
+        }
       } else {
-        Alert.alert("Error", "Phone number not found");
+        const staff = await AuthService.findStaffByEmail(email);
+        
+        if (staff) {
+          navigation.navigate('OTPScreen', { 
+            userType: 'staff', 
+            identifier: email 
+          });
+        } else {
+          Alert.alert("Lỗi", "Email không tồn tại");
+        }
       }
-    } else {
-      const staff = mockData.staff.find(s => s.email === email);
-      if (staff) {
-        navigation.navigate('OTPScreen', { 
-          userType: 'staff', 
-          identifier: email 
-        });
-      } else {
-        Alert.alert("Error", "Email not found");
-      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã có lỗi xảy ra");
     }
   };
 

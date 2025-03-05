@@ -12,5 +12,27 @@ export type RootStackParamList = {
     identifier: string;
   };
   More: undefined;
+  PropertyDetail:undefined;
+  RepairInside: undefined; 
 };
+
+export interface Resident {
+  id?: string;
+  phone: number;
+  name: string;
+  property: Property[];
+  otp: string;
+}
+export interface Staff {
+  id?: string;
+  email: string;
+  name: string;
+  otp: string;
+}
+export interface Property {
+  building: string;
+  floor: number;
+  unit: string;
+  status: string;
+}
 

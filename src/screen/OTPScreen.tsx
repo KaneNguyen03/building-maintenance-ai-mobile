@@ -15,7 +15,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { mockData } from '../mock/mockData';
+// import { mockData } from '../mock/mockData';
+import { AuthService } from '../service/api';
 
 type OTPScreenNavigationProp = StackNavigationProp<RootStackParamList, 'OTPScreen'>;
 
@@ -53,40 +54,44 @@ const OTPScreen = () => {
   };
 
   const handleVerify = async () => {
-    const enteredOtp = otp.join('');
-    
-    if (params.userType === 'resident') {
-      const resident = mockData.residents.find(r => r.phone === params.identifier);
-      if (resident && resident.otp === enteredOtp) {
-        // Lưu thông tin người dùng
-        await AsyncStorage.setItem('userData', JSON.stringify({
-          name: resident.name,
-          phone: resident.phone,
-          userType: 'resident'
-        }));
+    try {
+      const enteredOtp = otp.join('');
+      
+      if (params.userType === 'resident') {
+        const resident = await AuthService.findResidentByPhone(Number(params.identifier));
         
-        Alert.alert("Success", `Welcome ${resident.name}`, [
-          { text: "OK", onPress: () => navigation.navigate('MainApp') }
-        ]);
+        if (resident && resident.otp === enteredOtp) {
+          await AsyncStorage.setItem('userData', JSON.stringify({
+            name: resident.name,
+            phone: resident.phone,
+            userType: 'resident'
+          }));
+          
+          Alert.alert("Thành công", `Chào mừng ${resident.name}`, [
+            { text: "OK", onPress: () => navigation.navigate('MainApp') }
+          ]);
+        } else {
+          Alert.alert("Lỗi", "Mã OTP không đúng");
+        }
       } else {
-        Alert.alert("Error", "Invalid OTP");
-      }
-    } else {
-      const staff = mockData.staff.find(s => s.email === params.identifier);
-      if (staff && staff.otp === enteredOtp) {
-        // Lưu thông tin người dùng
-        await AsyncStorage.setItem('userData', JSON.stringify({
-          name: staff.name,
-          email: staff.email,
-          userType: 'staff'
-        }));
+        const staff = await AuthService.findStaffByEmail(params.identifier);
         
-        Alert.alert("Success", `Welcome ${staff.name}`, [
-          { text: "OK", onPress: () => navigation.navigate('MainApp') }
-        ]);
-      } else {
-        Alert.alert("Error", "Invalid OTP");
+        if (staff && staff.otp === enteredOtp) {
+          await AsyncStorage.setItem('userData', JSON.stringify({
+            name: staff.name,
+            email: staff.email,
+            userType: 'staff'
+          }));
+          
+          Alert.alert("Thành công", `Chào mừng ${staff.name}`, [
+            { text: "OK", onPress: () => navigation.navigate('MainApp') }
+          ]);
+        } else {
+          Alert.alert("Lỗi", "Mã OTP không đúng");
+        }
       }
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã có lỗi xảy ra");
     }
   };
 
