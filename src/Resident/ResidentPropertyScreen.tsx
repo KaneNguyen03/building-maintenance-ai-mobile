@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ActivityIndi
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Property } from '../types';
-import { PropertyService } from '../service/propertyservice';
+import { PropertyService } from '../service/propertyService';
 
 // Mock data (giả sử đã được import từ file khác)
 // import { mockData } from '../mock/mockData';
@@ -29,15 +29,16 @@ const ResidentPropertyScreen = () => {
     }
   };
 
-  // const handleCardPress = (property: Property) => {
-  //   navigation.navigate('PropertyDetail', { property });
-  // };
+  const handleCardPress = (property: Property) => {
+     //@ts-ignore
+    navigation.navigate('PropertyDetail', { property });
+  };
 
   const renderPropertyItem = ({ item }: { item: Property }) => {
     return (
       <TouchableOpacity 
         style={styles.propertyCard} 
-        // onPress={() => handleCardPress(item)}
+        onPress={() => handleCardPress(item)}
         activeOpacity={0.8}
       >
         <View style={styles.propertyHeader}>
@@ -46,7 +47,7 @@ const ResidentPropertyScreen = () => {
         </View>
         
         <Text style={styles.apartmentCode}>
-          {item.building}{item.floor}.{item.unit}
+          {item.building}.{item.unit}
         </Text>
         
         <Text style={styles.buildingInfo}>
@@ -107,13 +108,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10
   },
   propertyCard: {
-    width: '100%',
-    alignItems: 'center',
+    alignItems: "center",
     padding: 20,
-    marginBottom: 16,
-    backgroundColor: '#fff',
+    marginBottom: 20,
+    backgroundColor: "#fff",
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

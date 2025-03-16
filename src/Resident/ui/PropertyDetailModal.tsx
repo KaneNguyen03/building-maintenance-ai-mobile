@@ -31,18 +31,20 @@ const PropertyDetailScreen = () => {
         >
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {property.building}
-          {property.floor}.{property.unit}
-        </Text>
       </View>
 
       {/* Card căn hộ */}
-      <View style={styles.propertyCard}>
-        <Text style={styles.propertyText}>
-          Tòa {property.building} ({property.building}) | Căn hộ
+      <View style={styles.propertyInfo}>
+        <Text style={styles.unitCode}>
+          {property.building}.{property.unit}
         </Text>
-        <Text style={styles.statusText}>{property.status}</Text>
+        <Text style={styles.subTitle}>Tòa {property.building} | Căn hộ</Text>
+        <View style={styles.row}>
+          <Text style={styles.projectName}>Lumière Boulevard</Text>
+          <View style={styles.statusTag}>
+            <Text style={styles.statusText}>{property.status}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Danh sách tiện ích */}
@@ -57,7 +59,7 @@ const PropertyDetailScreen = () => {
             onPress={() => {
               if (item.name === "Sửa chữa trong nhà") {
                 //@ts-ignore
-                navigation.navigate("RepairInside");
+                navigation.navigate("RepairInside", { property });
               }
             }}
           >
@@ -80,15 +82,46 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  propertyCard: {
-    backgroundColor: "#F2E8D9",
-    padding: 20,
+  propertyInfo: {
+    padding: 16,
+    backgroundColor: "#FDF7F0",
     borderRadius: 10,
-    alignItems: "center",
     marginBottom: 20,
   },
-  propertyText: { fontSize: 18, fontWeight: "bold" },
-  statusText: { fontSize: 16, color: "#B77F2E", marginTop: 5 },
+  unitCode: {
+    fontSize: 24,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  subTitle: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  projectName: {
+    fontSize: 14,
+    color: "#B77F2E",
+    fontWeight: "bold",
+  },
+  statusTag: {
+    backgroundColor: "#FFFF",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    color: "#B77F2E",
+    fontWeight: "bold",
+  },
   sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   serviceItem: {
     flex: 1,

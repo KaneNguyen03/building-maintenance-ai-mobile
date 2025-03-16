@@ -1,4 +1,3 @@
-// src/screen/OTPScreen.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -8,14 +7,13 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert
+  Animated
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-// import { mockData } from '../mock/mockData';
 import { AuthService } from '../service/api';
 
 type OTPScreenNavigationProp = StackNavigationProp<RootStackParamList, 'OTPScreen'>;
@@ -26,28 +24,31 @@ const OTPScreen = () => {
   const params = route.params as { userType: 'resident' | 'staff'; identifier: string };
   
   const [otp, setOtp] = useState(['', '', '', '']);
+  const [error, setError] = useState(false);
   const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null]);
+
+  // Animation state
+  const shakeAnimation = useRef(new Animated.Value(0)).current;
+  const borderColorAnimation = useRef(new Animated.Value(0)).current;
 
   const handleBack = () => {
     navigation.goBack();
   };
 
   const handleChangeText = (text: string, index: number) => {
-    // Only allow digits
     if (!/^\d*$/.test(text)) return;
 
     const newOtp = [...otp];
     newOtp[index] = text;
     setOtp(newOtp);
+    setError(false); // Reset lỗi khi nhập mới
 
-    // Auto focus to next input
     if (text.length === 1 && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyPress = (e: any, index: number) => {
-    // Handle backspace
     if (e.nativeEvent.key === 'Backspace' && index > 0 && otp[index] === '') {
       inputRefs.current[index - 1]?.focus();
     }
@@ -56,51 +57,69 @@ const OTPScreen = () => {
   const handleVerify = async () => {
     try {
       const enteredOtp = otp.join('');
-      
+      let isValid = false;
+      let userData = null;
+
       if (params.userType === 'resident') {
         const resident = await AuthService.findResidentByPhone(Number(params.identifier));
-        
         if (resident && resident.otp === enteredOtp) {
-          await AsyncStorage.setItem('userData', JSON.stringify({
-            name: resident.name,
-            phone: resident.phone,
-            userType: 'resident'
-          }));
-          
-          Alert.alert("Thành công", `Chào mừng ${resident.name}`, [
-            { text: "OK", onPress: () => navigation.navigate('MainApp') }
-          ]);
-        } else {
-          Alert.alert("Lỗi", "Mã OTP không đúng");
+          isValid = true;
+          userData = { name: resident.name, phone: resident.phone, userType: 'resident' };
         }
       } else {
         const staff = await AuthService.findStaffByEmail(params.identifier);
-        
         if (staff && staff.otp === enteredOtp) {
-          await AsyncStorage.setItem('userData', JSON.stringify({
-            name: staff.name,
-            email: staff.email,
-            userType: 'staff'
-          }));
-          
-          Alert.alert("Thành công", `Chào mừng ${staff.name}`, [
-            { text: "OK", onPress: () => navigation.navigate('MainApp') }
-          ]);
-        } else {
-          Alert.alert("Lỗi", "Mã OTP không đúng");
+          isValid = true;
+          userData = { name: staff.name, email: staff.email, userType: 'staff' };
         }
       }
+
+      if (isValid) {
+        await AsyncStorage.setItem('userData', JSON.stringify(userData));
+        navigation.navigate('MainApp');
+      } else {
+        setError(true);
+        triggerErrorAnimation(); // Kích hoạt hiệu ứng khi OTP sai
+      }
     } catch (error) {
-      Alert.alert("Lỗi", "Đã có lỗi xảy ra");
+      setError(true);
+      triggerErrorAnimation();
     }
   };
+
+  // Shake + Border Color Animation when OTP is wrong
+  const triggerErrorAnimation = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
+    ]).start();
+
+    Animated.timing(borderColorAnimation, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: false
+    }).start(() => {
+      Animated.timing(borderColorAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false
+      }).start();
+    });
+  };
+
+  const borderColor = borderColorAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#CCCCCC', 'red']
+  });
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
@@ -108,29 +127,28 @@ const OTPScreen = () => {
       <Text style={styles.headerTitle}>Enter OTP</Text>
 
       <View style={styles.inputSection}>
-        <Text style={styles.inputLabel}>
-          Enter verification code sent to{" "}
-          {params.identifier}
-        </Text>
+        <Text style={styles.inputLabel}>Enter verification code sent to {params.identifier}</Text>
         
-        <View style={styles.otpContainer}>
+        <Animated.View style={[styles.otpContainer, { transform: [{ translateX: shakeAnimation }] }]}>
           {otp.map((digit, index) => (
-            <TextInput
-              key={index}
-              ref={ref => inputRefs.current[index] = ref}
-              style={styles.otpInput}
-              value={digit}
-              onChangeText={(text) => handleChangeText(text, index)}
-              onKeyPress={(e) => handleKeyPress(e, index)}
-              keyboardType="number-pad"
-              maxLength={1}
-              textAlign="center"
-            />
+            <Animated.View key={index} style={[styles.otpWrapper, { borderColor }]}>
+              <TextInput
+                ref={ref => inputRefs.current[index] = ref}
+                style={styles.otpInput}
+                value={digit}
+                onChangeText={(text) => handleChangeText(text, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                keyboardType="number-pad"
+                maxLength={1}
+                textAlign="center"
+              />
+            </Animated.View>
           ))}
-        </View>
+        </Animated.View>
+
+        {error && <Text style={styles.errorText}>Wrong OTP, Please re-enter</Text>}
       </View>
 
-      {/* Verify Button */}
       <TouchableOpacity
         style={[
           styles.verifyButton,
@@ -174,14 +192,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 16,
   },
-  otpInput: {
+  otpWrapper: {
     width: 70,
     height: 70,
-    borderWidth: 1,
-    borderColor: '#CCCCCC',
+    borderWidth: 2,
     borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  otpInput: {
     fontSize: 24,
     fontWeight: 'bold',
+    width: '100%',
+    height: '100%',
+    textAlign: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
   },
   verifyButton: {
     borderRadius: 12,
