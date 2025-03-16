@@ -8,6 +8,9 @@ import MoreScreen from './src/screen/More';
 import PropertyDetailScreen from './src/Resident/ui/PropertyDetailModal';
 import { RootStackParamList } from './src/types';
 import RepairInsideScreen from './src/Resident/ui/RepairInsideScreen';
+import RepairReviewScreen from './src/Resident/ui/RepairReviewScreen';
+import RepairSuccessScreen from './src/Resident/ui/RepairSuccessScreen';
+import MyReportScreen from './src/Resident/MyReportScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -21,6 +24,9 @@ const App = () => {
         <Stack.Screen name="More" component={MoreScreen} />
         <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
         <Stack.Screen name='RepairInside' component={RepairInsideScreen}/>
+        <Stack.Screen name="RepairReview" component={RepairReviewScreen} />
+        <Stack.Screen name="RepairSuccess" component={RepairSuccessScreen} />
+        <Stack.Screen name='MyReport' component={MyReportScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

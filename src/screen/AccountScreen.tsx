@@ -1,6 +1,14 @@
 // src/screen/AccountScreen.tsx
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Animated,
+  Easing,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,7 +23,34 @@ type AccountScreenNavigationProp = StackNavigationProp<
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [headerAnim] = useState(new Animated.Value(0));
+  const [bodyAnim] = useState(new Animated.Value(0));
   const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      headerAnim.setValue(0);
+      bodyAnim.setValue(0);
+
+      Animated.sequence([
+        Animated.timing(headerAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bodyAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  
 
   useEffect(() => {
     checkLoginStatus();
@@ -50,65 +85,74 @@ const AccountScreen = () => {
     Alert.alert("Thông báo", "Chức năng đổi mật khẩu sẽ được phát triển sau");
   };
 
-  // UI cho người dùng chưa đăng nhập
-  const renderGuestUI = () => {
-    return (
-      <View style={styles.container}>
+
+
+  return (
+    <View style={styles.container}>
+      {/* Header Animation */}
+      <Animated.View
+        style={{
+          transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-30, 0] }) }],
+          opacity: headerAnim,
+        }}
+      >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Account</Text>
+          {isLoggedIn && (
+            <TouchableOpacity onPress={navigateToMore} style={styles.menuButton}>
+              <Icon name="menu" size={28} color="#000" />
+            </TouchableOpacity>
+          )}
         </View>
+      </Animated.View>
 
+      {/* Body Animation */}
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: bodyAnim,
+          transform: [{ translateY: bodyAnim.interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }],
+        }}
+      >
+        {isLoggedIn ? renderUserUI() : renderGuestUI()}
+      </Animated.View>
+    </View>
+  );
+
+  // UI cho guest
+  function renderGuestUI() {
+    return (
+      <>
         <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
           <Text style={styles.signInText}>Sign Up</Text>
         </TouchableOpacity>
 
         <View style={styles.optionsList}>
           <TouchableOpacity style={styles.optionItem}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#E3F2FD" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#E3F2FD" }]}>
               <Icon name="language" size={24} color="#4CB5F5" />
             </View>
             <Text style={styles.optionText}>Language</Text>
             <Text style={styles.menuValue}>English</Text>
-            <Icon
-              name="chevron-right"
-              size={24}
-              color="#666"
-              style={styles.chevron}
-            />
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.optionItem}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#EFEBE9" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#EFEBE9" }]}>
               <Icon name="info-outline" size={24} color="#B77F2E" />
             </View>
             <Text style={styles.optionText}>About Us</Text>
-            <Icon
-              name="chevron-right"
-              size={24}
-              color="#666"
-              style={styles.chevron}
-            />
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
           </TouchableOpacity>
         </View>
-      </View>
+      </>
     );
-  };
+  }
 
-  // UI cho người dùng đã đăng nhập
-  const renderUserUI = () => {
+  // UI cho user
+  function renderUserUI() {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Account</Text>
-          <TouchableOpacity onPress={navigateToMore} style={styles.menuButton}>
-            <Icon name="menu" size={28} color="#000" />
-          </TouchableOpacity>
-        </View>
-
+      <>
         <View style={styles.userInfoContainer}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -124,7 +168,7 @@ const AccountScreen = () => {
         </View>
 
         <View style={styles.cardsContainer}>
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("MyReport")}>
             <Icon name="description" size={24} color="#000" />
             <Text style={styles.cardText}>MyReport</Text>
           </TouchableOpacity>
@@ -139,35 +183,19 @@ const AccountScreen = () => {
           <TouchableOpacity style={styles.optionItem}>
             <Icon name="location-on" size={24} color="#666" />
             <Text style={styles.optionText}>Address</Text>
-            <Icon
-              name="chevron-right"
-              size={24}
-              color="#666"
-              style={styles.chevron}
-            />
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.optionItem}
-            onPress={handleChangePassword}
-          >
+          <TouchableOpacity style={styles.optionItem} onPress={handleChangePassword}>
             <Icon name="lock" size={24} color="#666" />
             <Text style={styles.optionText}>ChangePassword</Text>
-            <Icon
-              name="chevron-right"
-              size={24}
-              color="#666"
-              style={styles.chevron}
-            />
+            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
           </TouchableOpacity>
         </View>
-      </View>
+      </>
     );
-  };
-
-  return isLoggedIn ? renderUserUI() : renderGuestUI();
+  }
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -281,11 +309,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  menuValue:{
+  menuValue: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginRight: 8,
-  }
+  },
 });
 
 export default AccountScreen;
