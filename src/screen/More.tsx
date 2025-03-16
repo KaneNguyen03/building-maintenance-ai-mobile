@@ -1,20 +1,19 @@
-// src/screen/MoreScreen.tsx
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
-  ScrollView
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+  ScrollView,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon2 from "react-native-vector-icons/AntDesign";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type MoreScreenNavigationProp = StackNavigationProp<RootStackParamList, 'More'>;
+type MoreScreenNavigationProp = StackNavigationProp<RootStackParamList, "More">;
 
 const MoreScreen = () => {
   const navigation = useNavigation<MoreScreenNavigationProp>();
@@ -23,12 +22,12 @@ const MoreScreen = () => {
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await AsyncStorage.getItem('userData');
+        const data = await AsyncStorage.getItem("userData");
         if (data) {
           setUserData(JSON.parse(data));
         }
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin người dùng:', error);
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
       }
     };
 
@@ -41,12 +40,10 @@ const MoreScreen = () => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userData');
-      Alert.alert('Thành công', 'Đăng xuất thành công', [
-        { text: 'OK', onPress: () => navigation.navigate('MainApp') }
-      ]);
+      await AsyncStorage.removeItem("userData");
+      navigation.navigate("MainApp");
     } catch (error) {
-      console.error('Lỗi khi đăng xuất:', error);
+      console.error("Lỗi khi đăng xuất:", error);
     }
   };
 
@@ -65,42 +62,94 @@ const MoreScreen = () => {
           <View style={styles.userHeader}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {userData.name ? userData.name.charAt(0).toUpperCase() : 'U'}
+                {userData.name ? userData.name.charAt(0).toUpperCase() : "U"}
               </Text>
             </View>
-            <Text style={styles.userName}>{userData.name || 'Người dùng'}</Text>
+            <Text style={styles.userName}>{userData.name || "Người dùng"}</Text>
           </View>
         )}
 
         <View style={styles.menuOptions}>
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="language" size={24} color="#666" />
-            <Text style={styles.menuText}>Languege</Text>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#E3F2FD" }]}
+            >
+              <Icon name="language" size={24} color="#4CB5F5" />
+            </View>
+            <Text style={styles.menuText}>Language</Text>
             <Text style={styles.menuValue}>English</Text>
-            <Icon name="chevron-right" size={24} color="#666" />
+            <Icon
+              name="chevron-right"
+              size={24}
+              color="#666"
+              style={styles.chevron}
+            />
+
           </TouchableOpacity>
-          
+          {/* FAQ */}
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="help-outline" size={24} color="#666" />
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#EDE7F6" }]}
+            >
+              <Icon name="help-outline" size={24} color="#A084E8" />
+            </View>
+            <Text style={styles.menuText}>FAQ</Text>
+            <Icon
+              name="chevron-right"
+              size={24}
+              color="#666"
+              style={styles.chevron}
+            />
+          </TouchableOpacity>
+
+          {/* How to Use */}
+          <TouchableOpacity style={styles.menuItem}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#FFF3E0" }]}
+            >
+              <Icon2 name="book" size={24} color="#F4C27F" />
+            </View>
             <Text style={styles.menuText}>How to Use</Text>
-            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+            <Icon
+              name="chevron-right"
+              size={24}
+              color="#666"
+              style={styles.chevron}
+            />
           </TouchableOpacity>
-          
+
+          {/* About Us */}
           <TouchableOpacity style={styles.menuItem}>
-            <Icon name="info" size={24} color="#666" />
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#EFEBE9" }]}
+            >
+              <Icon name="info-outline" size={24} color="#B77F2E" />
+            </View>
             <Text style={styles.menuText}>About Us</Text>
-            <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
+            <Icon
+              name="chevron-right"
+              size={24}
+              color="#666"
+              style={styles.chevron}
+            />
           </TouchableOpacity>
-          
+
+          {/* Logout */}
           {userData && (
-            <>
-              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-                <Icon name="logout" size={24} color="#666" />
-                <Text style={styles.menuText}>Đăng xuất</Text>
-                <Icon name="chevron-right" size={24} color="#666" style={styles.chevron} />
-              </TouchableOpacity>
-              
-            </>
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <View
+                style={[styles.iconContainer, { backgroundColor: "#F5F5F5" }]}
+              >
+                <Icon name="logout" size={24} color="#E8D6C1" />
+              </View>
+              <Text style={styles.menuText}>Log Out</Text>
+              <Icon
+                name="chevron-right"
+                size={24}
+                color="#666"
+                style={styles.chevron}
+              />
+            </TouchableOpacity>
           )}
         </View>
       </ScrollView>
@@ -116,99 +165,92 @@ const MoreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   content: {
     flex: 1,
   },
   userHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#B77F2E',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#B77F2E",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   avatarText: {
-    color: 'white',
+    color: "white",
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   userName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   menuOptions: {
     marginTop: 8,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuText: {
     flex: 1,
     marginLeft: 16,
     fontSize: 16,
   },
-  menuValue: {
-    fontSize: 14,
-    color: '#666',
-    marginRight: 8,
-  },
   chevron: {
-    marginLeft: 'auto',
-  },
-  dangerItem: {
-    marginTop: 16,
-  },
-  dangerText: {
-    flex: 1,
-    marginLeft: 16,
-    fontSize: 16,
-    color: '#ff3b30',
+    marginLeft: "auto",
   },
   footer: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  versionText: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
+    borderTopColor: "#f0f0f0",
   },
   copyrightText: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
   },
+  menuValue:{
+    fontSize: 14,
+    color: '#666',
+    marginRight: 8,
+  }
 });
 
 export default MoreScreen;

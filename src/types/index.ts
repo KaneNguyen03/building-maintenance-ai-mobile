@@ -12,8 +12,8 @@ export type RootStackParamList = {
     identifier: string;
   };
   More: undefined;
-  PropertyDetail:undefined;
-  RepairInside: undefined; 
+  PropertyDetail: undefined;
+  RepairInside: { property?: Property };
 };
 
 export interface Resident {

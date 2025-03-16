@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ActivityIndi
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Property } from '../types';
-import { PropertyService } from '../service/propertyservice';
+import { PropertyService } from '../service/propertyService';
 
 // Mock data (giả sử đã được import từ file khác)
 // import { mockData } from '../mock/mockData';
@@ -29,15 +29,15 @@ const ResidentPropertyScreen = () => {
     }
   };
 
-  // const handleCardPress = (property: Property) => {
-  //   navigation.navigate('PropertyDetail', { property });
-  // };
+  const handleCardPress = (property: Property) => {
+    navigation.navigate('PropertyDetail', { property });
+  };
 
   const renderPropertyItem = ({ item }: { item: Property }) => {
     return (
       <TouchableOpacity 
         style={styles.propertyCard} 
-        // onPress={() => handleCardPress(item)}
+        onPress={() => handleCardPress(item)}
         activeOpacity={0.8}
       >
         <View style={styles.propertyHeader}>
