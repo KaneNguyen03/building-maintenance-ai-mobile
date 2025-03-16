@@ -21,19 +21,43 @@ const RepairReviewScreen = () => {
     images: string[];
   };
   const handleSubmit = async () => {
+    const userData = await AsyncStorage.getItem("userData");
+    const user = userData ? JSON.parse(userData) : null;
+    if (!user) return;
+  
+    const userKey = user.phone.toString(); // phone là số => chuyển thành string
+  
+    const reportKey = `myReports_${userKey}`;
+    const notiKey = `notifications_${userKey}`;
+  
     const report = {
       property,
       description,
       images,
       date: new Date().toISOString(),
     };
-    const existingReports = await AsyncStorage.getItem("myReports");
+  
+    const existingReports = await AsyncStorage.getItem(reportKey);
     const parsedReports = existingReports ? JSON.parse(existingReports) : [];
     parsedReports.push(report);
-    await AsyncStorage.setItem("myReports", JSON.stringify(parsedReports));
-    // @ts-ignore
-   navigation.navigate("RepairSuccess"); // chuyển sang màn thành công
+    await AsyncStorage.setItem(reportKey, JSON.stringify(parsedReports));
+  
+    const now = new Date();
+    const newNotification = {
+      id: `${now.getTime()}`,
+      message: "Report của bạn đang được xử lý, vui lòng đợi phản hồi.",
+      timestamp: now.toLocaleString(),
+    };
+    const existingNoti = await AsyncStorage.getItem(notiKey);
+    const notiList = existingNoti ? JSON.parse(existingNoti) : [];
+    notiList.unshift(newNotification);
+    await AsyncStorage.setItem(notiKey, JSON.stringify(notiList));
+  
+    //@ts-ignore
+    navigation.navigate("RepairSuccess");
   };
+  
+
 
   return (
     <ScrollView style={styles.container}>

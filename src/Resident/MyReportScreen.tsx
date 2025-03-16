@@ -19,27 +19,37 @@ const MyReportScreen = () => {
 
   useEffect(() => {
     const loadReports = async () => {
-      setLoading(true);
-      const stored = await AsyncStorage.getItem("myReports");
+      const userString = await AsyncStorage.getItem("userData");
+      if (!userString) return;
+    
+      const user = JSON.parse(userString);
+      const userKey = user.phone.toString();
+    
+      const stored = await AsyncStorage.getItem(`myReports_${userKey}`);
       if (stored) setReports(JSON.parse(stored));
-      setLoading(false);
     };
     const unsubscribe = navigation.addListener("focus", loadReports);
     return unsubscribe;
   }, [navigation]);
 
   const handleClearAll = async () => {
-    await AsyncStorage.removeItem("myReports");
+    const userString = await AsyncStorage.getItem("userData");
+    if (!userString) return;
+  
+    const user = JSON.parse(userString);
+    const userKey = user.phone.toString();
+  
+    await AsyncStorage.removeItem(`myReports_${userKey}`);
     setReports([]);
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#B77F2E" />
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color="#B77F2E" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <ScrollView style={styles.container}>
