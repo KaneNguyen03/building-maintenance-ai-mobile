@@ -8,9 +8,9 @@ import {
   FlatList,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
-const NotificationScreen = () => {
+const NotificationScreen = ({onReadAll }: {onReadAll: () => void }) => {
   const navigation = useNavigation();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,27 +24,59 @@ const NotificationScreen = () => {
   const fetchNotifications = async () => {
     const userString = await AsyncStorage.getItem("userData");
     if (!userString) return;
-  
+
     const user = JSON.parse(userString);
     const userKey = user.phone.toString();
-  
+
     setLoading(true);
     const data = await AsyncStorage.getItem(`notifications_${userKey}`);
     const parsed = data ? JSON.parse(data) : [];
     setNotifications(parsed);
     setLoading(false);
   };
-  
 
   useEffect(() => {
     fetchUserStatus();
-    fetchNotifications();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNotifications();
+      onReadAll(); 
+    }, [])
+  );
+
+  const deleteNotification = async (id: string) => {
+    const userString = await AsyncStorage.getItem("userData");
+    if (!userString) return;
+  
+    const user = JSON.parse(userString);
+    const userKey = user.phone.toString();
+    const data = await AsyncStorage.getItem(`notifications_${userKey}`);
+    const parsed = data ? JSON.parse(data) : [];
+  
+    const updatedNotifications = parsed.filter((item: any) => item.id !== id);
+  
+    await AsyncStorage.setItem(
+      `notifications_${userKey}`,
+      JSON.stringify(updatedNotifications)
+    );
+  
+    setNotifications(updatedNotifications);
+  };
+
+  
 
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.notiCard}>
       <Text style={styles.notiMessage}>{item.message}</Text>
       <Text style={styles.notiTime}>{item.timestamp}</Text>
+      <TouchableOpacity
+      style={styles.deleteButton}
+      onPress={() => deleteNotification(item.id)}
+    >
+      <Text style={styles.deleteButtonText}>Delete</Text>
+    </TouchableOpacity>
     </View>
   );
 
@@ -184,6 +216,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     marginTop: 4,
+  },
+  deleteButton: {
+    marginTop: 8,
+    alignSelf: 'flex-end',
+    backgroundColor: '#E53935',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
